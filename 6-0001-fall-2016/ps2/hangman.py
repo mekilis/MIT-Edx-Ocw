@@ -10,10 +10,9 @@
 # but you will have to know how to use the functions
 # (so be sure to read the docstrings!)
 import random
-import string
 
 WORDLIST_FILENAME = "words.txt"
-
+with_hints = False
 
 def load_words():
     """
@@ -139,6 +138,17 @@ def hangman(secret_word):
         print("Available letters:", get_available_letters(letters_guessed))
         
         letter = input("Please guess a letter: ")
+
+        # Too lazy to retype hangman
+        if with_hints and letter == '*':
+            if len(letters_guessed) < 1:
+                print("No guesses allowed for now.")
+            else:
+                got_hint = True
+                print("Possible word matches are:")
+                show_possible_matches(guessed_word)
+                continue
+
         
         duplicate_guess, valid_guess = letter in all_letters_guessed, str.isalpha(str.lower(letter))
         if duplicate_guess or not valid_guess:
@@ -208,7 +218,19 @@ def match_with_gaps(my_word, other_word):
         False otherwise: 
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    my_word = my_word.replace(' ', '')
+    len_my_word, len_other = len(my_word), len(other_word)
+    if len_my_word != len_other:
+        return False
+
+    for i in range(len_other):
+        if my_word[i] == '_':
+            continue
+        # L - usual check. R - check for multiple occurrences of revealed word or lack of it
+        if my_word[i] != other_word[i] or my_word.count(my_word[i]) != other_word.count(my_word[i]):
+            return False
+
+    return True
 
 
 
@@ -223,7 +245,26 @@ def show_possible_matches(my_word):
 
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    found_match = False
+    my_word = my_word.replace(' ', '')
+    l = len(my_word)
+    for word in wordlist:
+        if len(word) != l:
+            continue
+        # O(n^2)
+        good = True
+        for i in range(l):
+            if my_word[i] == '_':
+                continue
+            if my_word[i] != word[i] or my_word.count(word[i]) != word.count(word[i]):
+                good = False
+                break
+        if good:
+            found_match = True
+            print(word)
+    if not found_match:
+        print("No matches found")
+
 
 
 
@@ -255,7 +296,10 @@ def hangman_with_hints(secret_word):
     Follows the other limitations detailed in the problem write-up.
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    global with_hints
+    with_hints = True
+    hangman(secret_word)
+    with_hints = False
 
 
 
@@ -270,14 +314,14 @@ if __name__ == "__main__":
 
     # To test part 2, comment out the pass line above and
     # uncomment the following two lines.
-    
-    secret_word = choose_word(wordlist)
-    hangman(secret_word)
+
+    # secret_word = choose_word(wordlist)
+    # hangman(secret_word)
 
 ###############
     
     # To test part 3 re-comment out the above lines and 
     # uncomment the following two lines. 
-    
-    #secret_word = choose_word(wordlist)
-    #hangman_with_hints(secret_word)
+
+    secret_word = choose_word(wordlist)
+    hangman_with_hints(secret_word)
